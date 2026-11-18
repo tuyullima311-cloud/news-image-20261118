@@ -11,6 +11,7 @@ Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
     mkdir -p out && MAKEFUN_OUTPUT_DIR=out python3 main.py
 """
 
+import hashlib
 import os
 import shutil
 from pathlib import Path
@@ -22,5 +23,9 @@ OUT.mkdir(parents=True, exist_ok=True)
 SRC = HERE / "entry.png"
 DST = OUT / "entry.png"
 shutil.copyfile(SRC, DST)
-# Sanity check: the copy must be complete, byte for byte.
+# Read-back verification: the copy must be complete, byte for byte.
 assert DST.stat().st_size == SRC.stat().st_size
+assert (
+    hashlib.sha256(SRC.read_bytes()).hexdigest()
+    == hashlib.sha256(DST.read_bytes()).hexdigest()
+), "copy failed: sha256 of destination differs from source"
